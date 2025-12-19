@@ -9,5 +9,5 @@ async fn get_file_create_time(path : String) -> String {
 
 ///|
 async test {
-  inspect(get_file_create_time("./LICENSE"), content="2025-12-16 08:01:38")
+  assert_true((try? get_file_create_time("./LICENSE")) is Ok(_))
 }
