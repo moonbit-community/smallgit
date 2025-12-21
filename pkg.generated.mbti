@@ -1,0 +1,19 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "moonbit-community/smallgit"
+
+// Values
+
+// Errors
+
+// Types and methods
+pub struct Repository {
+  worktree : String
+  git_dir : String
+  config : String
+}
+pub async fn Repository::new(String) -> Self
+
+// Type aliases
+
+// Traits
+
