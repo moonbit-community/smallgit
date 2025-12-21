@@ -11,6 +11,7 @@ pub struct Repository {
   git_dir : String
   config : String
 }
+pub async fn Repository::init(Self) -> Unit
 pub async fn Repository::new(String) -> Self
 
 // Type aliases

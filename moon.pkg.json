@@ -2,6 +2,7 @@
   "import": [
     "moonbitlang/async",
     "moonbitlang/async/fs",
+    "moonbitlang/async/io",
     "moonbitlang/x/time",
     "illusory0x0/path"
   ]
