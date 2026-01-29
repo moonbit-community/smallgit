@@ -2,12 +2,12 @@
   "name": "moonbit-community/smallgit",
   "version": "0.1.0",
   "deps": {
-    "moonbitlang/async": "0.14.3",
     "Yoorkin/ArgParser": "0.2.0",
-    "gmlewis/sha1": "0.11.25",
-    "moonbitlang/x": "0.4.38",
-    "gmlewis/zlib": "0.20.26",
-    "illusory0x0/path": "0.2.0"
+    "illusory0x0/path": "0.2.0",
+    "gmlewis/sha1": "0.12.1",
+    "gmlewis/zlib": "0.21.1",
+    "moonbitlang/async": "0.16.3",
+    "moonbitlang/x": "0.4.38"
   },
   "readme": "README.mbt.md",
   "repository": "",
