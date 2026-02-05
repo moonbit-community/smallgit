@@ -6,7 +6,10 @@ pub struct Repository {
 }
 
 ///|
-pub async fn Repository::new(worktree : String, force~ : Bool = false) -> Repository {
+pub async fn Repository::new(
+  worktree : String,
+  force? : Bool = false,
+) -> Repository {
   let pathbuf = @path.PathBuilder::from_path(@path.Path::parse(worktree))
   let git_dir = {
     pathbuf.add_directory(".git")

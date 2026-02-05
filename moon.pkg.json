@@ -3,6 +3,8 @@
     "moonbitlang/async",
     "moonbitlang/async/fs",
     "moonbitlang/async/io",
+    "moonbitlang/core/buffer",
+    "moonbitlang/core/encoding/utf8",
     "moonbitlang/x/time",
     "illusory0x0/path"
   ]

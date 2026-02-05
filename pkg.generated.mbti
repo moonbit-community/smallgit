@@ -6,15 +6,55 @@ package "moonbit-community/smallgit"
 // Errors
 
 // Types and methods
+pub struct BlobObject(Bytes)
+#deprecated
+pub fn BlobObject::inner(Self) -> Bytes
+pub impl Object for BlobObject
+
+pub struct CommitObject {
+  tree : String
+  parents : Array[String]
+  author : String
+  committer : String
+  message : String
+  extra_headers : Array[(String, String)]
+}
+pub impl Object for CommitObject
+
 pub struct Repository {
   worktree : String
   git_dir : String
   config : String
 }
 pub async fn Repository::init(Self) -> Unit
-pub async fn Repository::new(String) -> Self
+pub async fn Repository::new(String, force? : Bool) -> Self
+
+pub struct TagObject {
+  object : String
+  object_type : String
+  tag : String
+  tagger : String
+  message : String
+  extra_headers : Array[(String, String)]
+}
+pub impl Object for TagObject
+
+pub struct TreeEntry {
+  mode : String
+  name : String
+  oid : Bytes
+}
+
+pub struct TreeObject {
+  entries : Array[TreeEntry]
+}
+pub impl Object for TreeObject
 
 // Type aliases
 
 // Traits
+pub trait Object {
+  deserialize(Bytes) -> Self
+  serialize(Self) -> Bytes
+}
 
