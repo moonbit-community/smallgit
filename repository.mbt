@@ -6,12 +6,9 @@ pub struct Repository {
 }
 
 ///|
-pub async fn Repository::new(
-  worktree : String,
-  force? : Bool = false,
-) -> Repository {
+pub async fn Repository::new(worktree : String) -> Repository {
   let git_dir = "\{worktree}/.git"
-  if !(force || @fs.exists(git_dir)) {
+  if !@fs.exists(git_dir) {
     fail("\{git_dir} not exist")
   }
   let config_path = "\{git_dir}/config"
