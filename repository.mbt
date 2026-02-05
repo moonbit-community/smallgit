@@ -2,7 +2,7 @@
 pub struct Repository {
   worktree : String
   git_dir : String
-  config : String
+  config : @ini.IniFile
 }
 
 ///|
@@ -12,7 +12,7 @@ pub async fn Repository::new(worktree : String) -> Repository {
     fail("\{git_dir} not exist")
   }
   let config_path = "\{git_dir}/config"
-  let config = @fs.read_file(config_path.to_string()).text()
+  let config = @fs.read_file(config_path.to_string()).text() |> @ini.parse
   Repository::{ worktree, git_dir, config }
 }
 
