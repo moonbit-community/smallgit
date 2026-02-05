@@ -1,5 +1,6 @@
 {
   "import": [
+    "gmlewis/sha1",
     "moonbitlang/async",
     "moonbitlang/async/fs",
     "moonbitlang/async/io",

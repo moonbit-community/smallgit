@@ -1,6 +1,10 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "moonbit-community/smallgit"
 
+import {
+  "moonbit-community/ini",
+}
+
 // Values
 
 // Errors
@@ -21,13 +25,54 @@ pub struct CommitObject {
 }
 pub impl Object for CommitObject
 
+pub struct Index {
+  version : Int
+  entries : Array[IndexEntry]
+  extensions : Array[IndexExtension]
+  checksum : Bytes
+  checksum_valid : Bool
+}
+pub fn Index::empty(version? : Int) -> Self
+pub fn Index::from_bytes(Bytes) -> Self
+pub async fn Index::read_from(Repository) -> Self
+pub fn Index::to_bytes(Self) -> Bytes
+pub async fn Index::write_to(Self, Repository) -> Unit
+
+pub struct IndexEntry {
+  ctime_s : Int
+  ctime_ns : Int
+  mtime_s : Int
+  mtime_ns : Int
+  dev : Int
+  ino : Int
+  mode : Int
+  uid : Int
+  gid : Int
+  size : Int
+  oid : Bytes
+  flags : Int
+  extended_flags : Int
+  path : String
+}
+pub fn IndexEntry::assume_valid(Self) -> Bool
+pub fn IndexEntry::has_extended(Self) -> Bool
+pub fn IndexEntry::intent_to_add(Self) -> Bool
+pub fn IndexEntry::name_length(Self) -> Int
+pub fn IndexEntry::skip_worktree(Self) -> Bool
+pub fn IndexEntry::stage(Self) -> Int
+
+pub struct IndexExtension {
+  signature : String
+  data : Bytes
+}
+
 pub struct Repository {
   worktree : String
   git_dir : String
-  config : String
+  config : @ini.IniFile
 }
 pub async fn Repository::init(Self) -> Unit
-pub async fn Repository::new(String, force? : Bool) -> Self
+pub async fn Repository::new(String) -> Self
 
 pub struct TagObject {
   object : String

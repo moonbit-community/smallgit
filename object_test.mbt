@@ -1,7 +1,7 @@
 ///|
 fn assert_bytes_eq(
-  left : Bytes,
-  right : Bytes,
+  left : BytesView,
+  right : BytesView,
   context~ : String,
 ) -> Unit raise {
   let left_len = left.length()
@@ -195,5 +195,5 @@ test "object round-trip commit" {
     context="commit extra headers",
   )
   let round_trip = commit.serialize()
-  assert_bytes_eq(round_trip, encoded, context="commit round-trip")
+  assert_bytes_eq(round_trip, encoded[:], context="commit round-trip")
 }

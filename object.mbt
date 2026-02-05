@@ -7,8 +7,8 @@
 /// valid inputs. Current implementations are intentionally forgiving and do
 /// not raise errors on malformed inputs.
 pub trait Object {
-  deserialize(Bytes) -> Self
-  serialize(Self) -> Bytes
+  deserialize(BytesView) -> Self
+  serialize(Self) -> BytesView
 }
 
 ///|
@@ -16,7 +16,7 @@ pub trait Object {
 ///
 /// The payload is stored as-is. Serialization is the identity function and
 /// does not include any header.
-pub struct BlobObject(Bytes)
+pub struct BlobObject(BytesView)
 
 ///|
 /// Serialize a blob by returning its raw bytes unchanged.
@@ -99,7 +99,7 @@ pub struct CommitObject {
 ///
 /// The split happens at the first "\n\n". UTF-8 decoding is lossy to avoid
 /// raising errors on invalid byte sequences.
-fn split_headers_message(bytes : Bytes) -> (String, String) {
+fn split_headers_message(bytes : BytesView) -> (String, String) {
   match bytes.find(b"\n\n") {
     Some(idx) =>
       (@utf8.decode_lossy(bytes[:idx]), @utf8.decode_lossy(bytes[idx + 2:]))
