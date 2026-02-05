@@ -1,17 +1,4 @@
 ///|
-/// Git object body codec.
-///
-/// Implementations in this file operate on the raw object payload only
-/// (they do not include the "<type> <size>\0" header that Git uses on disk).
-/// The intent is that `serialize` and `deserialize` are logical inverses for
-/// valid inputs. Current implementations are intentionally forgiving and do
-/// not raise errors on malformed inputs.
-pub trait Object {
-  deserialize(BytesView) -> Self
-  serialize(Self) -> BytesView
-}
-
-///|
 /// Raw blob content wrapper.
 ///
 /// The payload is stored as-is. Serialization is the identity function and
@@ -20,13 +7,13 @@ pub struct BlobObject(BytesView)
 
 ///|
 /// Serialize a blob by returning its raw bytes unchanged.
-pub impl Object for BlobObject with serialize(self) {
+pub fn BlobObject::serialize(self : BlobObject) -> BytesView {
   self.0
 }
 
 ///|
 /// Deserialize a blob by wrapping the provided raw bytes.
-pub impl Object for BlobObject with deserialize(bytes) {
+pub fn BlobObject::deserialize(bytes : BytesView) -> BlobObject {
   BlobObject(bytes)
 }
 
@@ -150,7 +137,7 @@ fn write_header(buf : @buffer.Buffer, key : String, value : String) -> Unit {
 ///|
 /// Serialize a tree object using the Git tree entry format:
 /// "<mode> <name>\\0<20-byte-oid>" repeated for each entry.
-pub impl Object for TreeObject with serialize(self) {
+pub fn TreeObject::serialize(self : TreeObject) -> BytesView {
   let buf = @buffer.new()
   for entry in self.entries {
     buf.write_string_utf8(entry.mode.to_string_view())
@@ -167,7 +154,7 @@ pub impl Object for TreeObject with serialize(self) {
 ///
 /// Parsing is tolerant: if the input ends mid-entry or is malformed, the
 /// entries parsed so far are returned without raising an error.
-pub impl Object for TreeObject with deserialize(bytes) {
+pub fn TreeObject::deserialize(bytes : BytesView) -> TreeObject {
   let entries : Array[TreeEntry] = []
   let len = bytes.length()
   let mut i = 0
@@ -205,7 +192,7 @@ pub impl Object for TreeObject with deserialize(bytes) {
 ///
 /// Headers with empty string values are omitted. Unknown headers are emitted
 /// in the stored order after the standard headers.
-pub impl Object for TagObject with serialize(self) {
+pub fn TagObject::serialize(self : TagObject) -> BytesView {
   let buf = @buffer.new()
   if self.object != "" {
     write_header(buf, "object", self.object)
@@ -235,7 +222,7 @@ pub impl Object for TagObject with serialize(self) {
 ///
 /// Known headers overwrite earlier values if duplicated. Unknown headers are
 /// accumulated in order. UTF-8 decoding is lossy.
-pub impl Object for TagObject with deserialize(bytes) {
+pub fn TagObject::deserialize(bytes : BytesView) -> TagObject {
   let (header_text, message) = split_headers_message(bytes)
   let headers = parse_headers(header_text)
   let mut object = ""
@@ -262,7 +249,7 @@ pub impl Object for TagObject with deserialize(bytes) {
 /// The header order is fixed and does not preserve the original input order.
 /// Headers with empty string values are omitted, except `parent` which is
 /// emitted for each entry in `parents`.
-pub impl Object for CommitObject with serialize(self) {
+pub fn CommitObject::serialize(self : CommitObject) -> BytesView {
   let buf = @buffer.new()
   if self.tree != "" {
     write_header(buf, "tree", self.tree)
@@ -293,7 +280,7 @@ pub impl Object for CommitObject with serialize(self) {
 /// Duplicate `tree`, `author`, or `committer` headers are overwritten by the
 /// last occurrence. `parent` headers are collected in order. UTF-8 decoding is
 /// lossy.
-pub impl Object for CommitObject with deserialize(bytes) {
+pub fn CommitObject::deserialize(bytes : BytesView) -> CommitObject {
   let (header_text, message) = split_headers_message(bytes)
   let headers = parse_headers(header_text)
   let mut tree = ""
@@ -312,4 +299,23 @@ pub impl Object for CommitObject with deserialize(bytes) {
     }
   }
   CommitObject::{ tree, parents, author, committer, message, extra_headers }
+}
+
+///|
+pub enum Object {
+  Blob(BlobObject)
+  Tree(TreeObject)
+  Tag(TagObject)
+  Commit(CommitObject)
+}
+
+///|
+pub fn Repository::read_object(self : Repository, sha : String) -> Object {
+  ...
+}
+
+///|
+pub fn Repository::write_object(self : Repository, object : Object) -> String {
+  // return sha
+  ...
 }
