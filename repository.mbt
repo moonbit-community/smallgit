@@ -6,13 +6,13 @@ pub struct Repository {
 }
 
 ///|
-pub async fn Repository::new(worktree : String) -> Repository {
+pub async fn Repository::new(worktree : String, force~ : Bool = false) -> Repository {
   let pathbuf = @path.PathBuilder::from_path(@path.Path::parse(worktree))
   let git_dir = {
     pathbuf.add_directory(".git")
     pathbuf.to_path().to_string()
   }
-  if !@fs.exists(git_dir) {
+  if !(force || @fs.exists(git_dir)) {
     fail("\{git_dir} not exist")
   }
   let config_path = {
