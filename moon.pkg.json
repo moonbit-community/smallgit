@@ -1,9 +1,11 @@
 {
   "import": [
     "gmlewis/sha1",
+    "gmlewis/flate",
+    "gmlewis/zlib",
+    "gmlewis/io",
     "moonbitlang/async",
     "moonbitlang/async/fs",
-    "moonbitlang/async/io",
     "moonbitlang/core/buffer",
     "moonbitlang/core/encoding/utf8",
     "moonbitlang/x/time",

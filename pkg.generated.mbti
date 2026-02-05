@@ -10,10 +10,11 @@ import {
 // Errors
 
 // Types and methods
-pub struct BlobObject(Bytes)
+pub struct BlobObject(BytesView)
+pub fn BlobObject::deserialize(BytesView) -> Self
 #deprecated
-pub fn BlobObject::inner(Self) -> Bytes
-pub impl Object for BlobObject
+pub fn BlobObject::inner(Self) -> BytesView
+pub fn BlobObject::serialize(Self) -> BytesView
 
 pub struct CommitObject {
   tree : String
@@ -23,7 +24,8 @@ pub struct CommitObject {
   message : String
   extra_headers : Array[(String, String)]
 }
-pub impl Object for CommitObject
+pub fn CommitObject::deserialize(BytesView) -> Self
+pub fn CommitObject::serialize(Self) -> BytesView
 
 pub struct Index {
   version : Int
@@ -66,6 +68,13 @@ pub struct IndexExtension {
   data : Bytes
 }
 
+pub enum Object {
+  Blob(BlobObject)
+  Tree(TreeObject)
+  Tag(TagObject)
+  Commit(CommitObject)
+}
+
 pub struct Repository {
   worktree : String
   git_dir : String
@@ -73,6 +82,8 @@ pub struct Repository {
 }
 pub async fn Repository::init(Self) -> Unit
 pub async fn Repository::new(String) -> Self
+pub async fn Repository::read_object(Self, String) -> Object
+pub async fn Repository::write_object(Self, Object, dry_run? : Bool) -> String
 
 pub struct TagObject {
   object : String
@@ -82,7 +93,8 @@ pub struct TagObject {
   message : String
   extra_headers : Array[(String, String)]
 }
-pub impl Object for TagObject
+pub fn TagObject::deserialize(BytesView) -> Self
+pub fn TagObject::serialize(Self) -> BytesView
 
 pub struct TreeEntry {
   mode : String
@@ -93,13 +105,10 @@ pub struct TreeEntry {
 pub struct TreeObject {
   entries : Array[TreeEntry]
 }
-pub impl Object for TreeObject
+pub fn TreeObject::deserialize(BytesView) -> Self
+pub fn TreeObject::serialize(Self) -> BytesView
 
 // Type aliases
 
 // Traits
-pub trait Object {
-  deserialize(Bytes) -> Self
-  serialize(Self) -> Bytes
-}
 

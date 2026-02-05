@@ -310,12 +310,142 @@ pub enum Object {
 }
 
 ///|
-pub fn Repository::read_object(self : Repository, sha : String) -> Object {
-  ...
+fn sha1_hex(bytes : Bytes) -> String {
+  let digest = @sha1.Digest::new()
+  for b in bytes {
+    let _ = digest.write_byte(b)
+
+  }
+  digest.check_sum()
 }
 
 ///|
-pub fn Repository::write_object(self : Repository, object : Object) -> String {
-  // return sha
-  ...
+fn parse_decimal(text : StringView) -> Int? {
+  let digits = @utf8.encode(text.to_string())
+  if digits.length() == 0 {
+    return None
+  }
+  let mut value = 0
+  for b in digits {
+    if b < b'0' || b > b'9' {
+      return None
+    }
+    value = value * 10 + (b.to_int() - b'0'.to_int())
+  }
+  Some(value)
+}
+
+///|
+fn zlib_decompress(bytes : Bytes) -> Bytes raise {
+  let input = @io.Buffer::from_bytes(bytes)
+  let (zr, err) = @zlib.Reader::new(input)
+  if err != None {
+    fail("zlib reader error: \{err}")
+  }
+  let (out, read_err) = @io.read_all(zr)
+  let close_err = zr.close()
+  if read_err != None {
+    fail("zlib read error: \{read_err}")
+  }
+  if close_err != None {
+    fail("zlib close error: \{close_err}")
+  }
+  out.to_bytes()
+}
+
+///|
+fn zlib_compress(bytes : Bytes) -> Bytes raise {
+  let out = @io.Buffer::new()
+  let zw = @zlib.Writer::new(out)
+  let slice = @io.Slice::new(bytes.to_array())
+  let (_, write_err) = zw.write(slice)
+  if write_err != None {
+    fail("zlib write error: \{write_err}")
+  }
+  let close_err = zw.close()
+  if close_err != None {
+    fail("zlib close error: \{close_err}")
+  }
+  out.to_bytes()
+}
+
+///|
+pub async fn Repository::read_object(self : Repository, sha : String) -> Object {
+  if sha.length() < 4 {
+    fail("invalid object id: \{sha}")
+  }
+  let dir = sha.view(start_offset=0, end_offset=2).to_string()
+  let file = sha.view(start_offset=2).to_string()
+  let path = "\{self.git_dir}/objects/\{dir}/\{file}"
+  if !@fs.exists(path) {
+    fail("object \{sha} not found")
+  }
+  let compressed = @fs.read_file(path).binary()
+  let raw = zlib_decompress(compressed)
+  match raw.find(b"\x00") {
+    None => fail("invalid object header")
+    Some(nul_idx) => {
+      let header = @utf8.decode_lossy(raw.sub(start=0, end=nul_idx))
+      match header.find(" ") {
+        None => fail("invalid object header")
+        Some(space_idx) => {
+          let kind = header.view(end_offset=space_idx).to_string()
+          let size_view = header.view(start_offset=space_idx + 1)
+          let size = match parse_decimal(size_view) {
+            None => fail("invalid object size")
+            Some(value) => value
+          }
+          let payload_start = nul_idx + 1
+          let payload_end = payload_start + size
+          if payload_end > raw.length() {
+            fail("truncated object payload")
+          }
+          let payload = raw.sub(start=payload_start, end=payload_end)
+          match kind {
+            "blob" => Object::Blob(BlobObject::deserialize(payload))
+            "tree" => Object::Tree(TreeObject::deserialize(payload))
+            "tag" => Object::Tag(TagObject::deserialize(payload))
+            "commit" => Object::Commit(CommitObject::deserialize(payload))
+            _ => fail("unknown object type: \{kind}")
+          }
+        }
+      }
+    }
+  }
+}
+
+///|
+pub async fn Repository::write_object(
+  self : Repository,
+  object : Object,
+  dry_run? : Bool = false,
+) -> String {
+  let (kind, payload) = match object {
+    Object::Blob(blob) => ("blob", blob.serialize())
+    Object::Tree(tree) => ("tree", tree.serialize())
+    Object::Tag(tag) => ("tag", tag.serialize())
+    Object::Commit(commit) => ("commit", commit.serialize())
+  }
+  let header = "\{kind} \{payload.length()}\u0000"
+  let buf = @buffer.new(size_hint=header.length() + payload.length())
+  buf.write_string_utf8(header.to_string_view())
+  buf.write_bytesview(payload)
+  let raw = buf.to_bytes()
+  let sha = sha1_hex(raw)
+  if dry_run {
+    return sha
+  }
+  let dir = sha.view(start_offset=0, end_offset=2).to_string()
+  let file = sha.view(start_offset=2).to_string()
+  let dir_path = "\{self.git_dir}/objects/\{dir}"
+  if !@fs.exists(dir_path) {
+    @fs.mkdir(dir_path, permission=0o755, recursive=true)
+  }
+  let obj_path = "\{dir_path}/\{file}"
+  if @fs.exists(obj_path) {
+    return sha
+  }
+  let compressed = zlib_compress(raw)
+  @fs.write_file(obj_path, compressed, create=0o444)
+  sha
 }

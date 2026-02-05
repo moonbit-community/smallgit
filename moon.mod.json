@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "deps": {
     "Yoorkin/ArgParser": "0.2.0",
+    "gmlewis/io": "0.23.1",
     "gmlewis/sha1": "0.12.1",
+    "gmlewis/flate": "0.36.1",
     "gmlewis/zlib": "0.21.1",
     "moonbitlang/async": "0.16.3",
     "moonbitlang/x": "0.4.38",
