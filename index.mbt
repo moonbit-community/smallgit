@@ -498,3 +498,11 @@ fn sha1_bytes(bytes : Bytes) -> Bytes {
   }
   hex_to_bytes(digest.check_sum())
 }
+
+pub async fn Repository::write_index(self : Repository, index : Index) -> Unit {
+  ...
+}
+
+pub async fn Repository::read_index(self : Repository) -> Index {
+  ...
+}
