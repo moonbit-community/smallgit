@@ -82,7 +82,9 @@ pub struct Repository {
 }
 pub async fn Repository::init(Self) -> Unit
 pub async fn Repository::new(String) -> Self
+pub async fn Repository::read_index(Self) -> Index
 pub async fn Repository::read_object(Self, String) -> Object
+pub async fn Repository::write_index(Self, Index) -> Unit
 pub async fn Repository::write_object(Self, Object, dry_run? : Bool) -> String
 
 pub struct TagObject {

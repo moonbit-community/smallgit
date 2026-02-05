@@ -500,9 +500,9 @@ fn sha1_bytes(bytes : Bytes) -> Bytes {
 }
 
 pub async fn Repository::write_index(self : Repository, index : Index) -> Unit {
-  ...
+  index.write_to(self)
 }
 
 pub async fn Repository::read_index(self : Repository) -> Index {
-  ...
+  Index::read_from(self)
 }
