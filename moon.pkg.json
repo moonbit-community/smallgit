@@ -5,7 +5,6 @@
     "moonbitlang/async/io",
     "moonbitlang/core/buffer",
     "moonbitlang/core/encoding/utf8",
-    "moonbitlang/x/time",
-    "illusory0x0/path"
+    "moonbitlang/x/time"
   ]
 }
